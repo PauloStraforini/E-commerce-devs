@@ -6,25 +6,24 @@ import { Product } from '@/data/types/product'
 import { api } from '@/data/api'
 
 interface SearchProps {
-    searchParams: {
+    searchParams: Promise<{
         q: string
-    }
+    }>
 }
 
 async function searchProducts(query: string): Promise<Product[]> {
     const response = await api(`/products/search?q=${query}`, {
         next: {
-            revalidate: 60 * 60, // 1 hora
+            revalidate: 60 * 60, // 1 hour
         },
     })
 
     const products = await response.json()
-
     return products
 }
 
 export default async function Search({ searchParams }: SearchProps) {
-    const { q: query } = searchParams
+    const { q: query } = await searchParams
 
     if (!query) {
         redirect('/')
