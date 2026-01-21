@@ -6,15 +6,15 @@ import { Product } from '@/data/types/product'
 import { AddToCartButton } from '@/components/add-to-cart-button'
 
 interface ProductProps {
-    params: {
+    params: Promise<{
         slug: string
-    }
+    }>
 }
 
 async function getProduct(slug: string): Promise<Product> {
     const response = await api(`/products/${slug}`, {
         next: {
-            revalidate: 60 * 60, // 1 hour
+            revalidate: 60 * 60,
         },
     })
 
@@ -26,7 +26,8 @@ async function getProduct(slug: string): Promise<Product> {
 export async function generateMetadata({
     params,
 }: ProductProps): Promise<Metadata> {
-    const product = await getProduct(params.slug)
+    const { slug } = await params
+    const product = await getProduct(slug)
 
     return {
         title: product.title,
@@ -43,7 +44,8 @@ export async function generateStaticParams() {
 }
 
 export default async function ProductPage({ params }: ProductProps) {
-    const product = await getProduct(params.slug)
+    const { slug } = await params
+    const product = await getProduct(slug)
 
     return (
         <div className="relative grid max-h-215 grid-cols-3">
